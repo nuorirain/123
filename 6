@@ -1,0 +1,108 @@
+mkdir demoqa_home
+cd demoqa_home
+
+mkdir pages tests components
+touch .gitignore
+touch readme.md
+touch conftest.py
+pip install pytest
+pip install selenium
+
+git init
+pip freeze > requirements.txt
+/venv
+.idea
+*.pytest_cache
+
+# 2 задание создание test_check_swag.py
+cd tests
+touch test_check_swag.py
+
+
+# 3 задание создайте фикстуру, код такойже как в рабочем проекте
+import pytest
+from selenium import webdriver
+
+@pytest.fixture
+def driver():
+    driver = webdriver.Chrome()  # chromedriver должен быть в корне проекта
+    driver.maximize_window()
+    yield driver
+    driver.quit()
+
+#4 задание реализация base_page.py
+cd pages
+touch base_page.py
+
+from selenium.webdriver.common.by import By
+
+class BasePage:
+    def __init__(self, driver, base_url='https://www.saucedemo.com/'):
+        self.driver = driver
+        self.base_url = base_url
+
+    def visit(self):
+        self.driver.get(self.base_url)
+
+    def find_element(self, locator):
+        return self.driver.find_element(*locator)
+
+#5 задание 
+cd pages
+touch swag_labs.py
+
+from pages.base_page import BasePage
+from selenium.common.exceptions import NoSuchElementException
+
+class SwagLabs(BasePage):
+
+    def exist_icon(self):
+        try:
+            self.find_element(locator=('css selector', 'div.login_logo'))
+        except NoSuchElementException:
+            return False
+        return True
+#6 задание Реализуйте тест-кейс
+import pytest
+from pages.swag_labs import SwagLabs
+
+def test_check_login_icon(driver):
+    page = SwagLabs(driver)
+    page.visit()
+    assert page.exist_icon() == True, "Логотипика то не найдено кекв"
+
+#7 задание реализуйте тест-кейс
+
+import pytest
+from pages.swag_labs import SwagLabs
+from selenium.webdriver.common.by import By
+
+def test_username_field_exists(driver):
+    page = SwagLabs(driver)
+    page.visit()
+    
+    try:
+        page.find_element((By.ID, 'user-name'))
+        field_exists = True
+    except:
+        field_exists = False
+
+    assert field_exists, "Поле имени (username) не найдено хах"
+
+#8 Задание
+
+import pytest
+from pages.swag_labs import SwagLabs
+from selenium.webdriver.common.by import By
+
+def test_password_field_exists(driver):
+    page = SwagLabs(driver)
+    page.visit()
+    
+    try:
+        page.find_element((By.ID, 'password'))
+        field_exists = True
+    except:
+        field_exists = False
+
+    assert field_exists, "Поле пароля не найдено"
